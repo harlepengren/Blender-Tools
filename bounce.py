@@ -1,3 +1,9 @@
+# Copyright (c) 2023 Harlepengren
+# http://harlepengren.com
+#
+# Licensed under Apache 2.0
+# This software is provided AS IS WITH NO EXPRESS OR IMPLIED WARRANTY OF ANY KIND.
+
 import bpy
 import math
 from mathutils import *
