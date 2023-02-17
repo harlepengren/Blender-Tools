@@ -1,3 +1,9 @@
+# (c) 2020 Harlepengren
+# http://harlepengren.com
+#
+# Licensed under Apache 2.0
+# This software is provided AS IS WITH NO EXPRESS OR IMPLIED WARRANTY OF ANY KIND.
+
 #import the modules
 import bpy
 import numpy as np
