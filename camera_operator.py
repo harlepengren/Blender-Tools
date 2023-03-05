@@ -1,3 +1,16 @@
+bl_info = {
+    "name": "Camera Rotation",
+    "author": "Harlepengren",
+    "version": (1, 0),
+    "blender": (3, 4, 0),
+    "location": "3D View Sidebar",
+    "description": "Rotates camera around a target object over a given number of frames.",
+    "warning": "",
+    "doc_url": "",
+    "tracker_url": "",
+    "category": "Object",
+}
+
 #import the modules
 import bpy
 import numpy as np
@@ -85,6 +98,12 @@ def register():
     
     # Create pointer reference for the property group
     bpy.types.Object.rotation_prop = bpy.props.PointerProperty(type=RotationPropertyGroup)
+    
+def unregister():
+    bpy.utils.unregister_class(RotationPropertyGroup)
+    bpy.utils.unregister_class(RotationOperator)
+    bpy.utils.unregister_class(RotationClearOperator)
+    bpy.utils.unregister_class(RotationPanel)
     
 if __name__ == "__main__":
     register()
