@@ -26,6 +26,21 @@ class RenderSettingsOperator(bpy.types.Operator):
     bl_idname = "scene.render_setting_operator"
     bl_label = "Render Instance Settings"
 
+    def CreateMaterial(self,text_object):
+        mat = bpy.data.materials.get("TextMaterial")
+        if mat is None:
+            mat = bpy.data.materials.new(name="TextMaterial")
+        
+        if not mat.use_nodes:
+            mat.use_nodes = True
+            nodes = mat.node_tree.nodes
+
+        
+        if text_object.data.materials:
+            text_object.materials[0] = mat
+        else:
+            text_object.data.materials.append(mat)
+        
 
     def execute(self, context):
         print("Rendering the scene")
@@ -42,13 +57,15 @@ class RenderSettingsOperator(bpy.types.Operator):
         currText = bpy.context.object
         currText.parent = bpy.data.objects["Camera"]
         currText.location = (-1.4,-0.696,-4.0)
+        self.CreateMaterial(currText)
         
         for index in range(0,iterations):
             renderSlots.active_index = index
             
             # Change the setting - using exec is not super safe
-            exec(context.scene.render_settings_prop.target + "=" + str(startingValue + incrementalValue*index))
-            
+            currentValue = startingValue + incrementalValue*index
+            exec(context.scene.render_settings_prop.target + "=" + str(currentValue))
+            currText.data.body = str(currentValue)
             bpy.ops.render.render()
             
         # Delete the text
