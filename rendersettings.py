@@ -32,9 +32,16 @@ class RenderSettingsOperator(bpy.types.Operator):
 
         renderSlots = bpy.data.images["Render Result"].render_slots
         
+        # Set the render seetings
         startingValue = context.scene.render_settings_prop.start
         iterations = min(context.scene.render_settings_prop.numRenders,len(renderSlots))
         incrementalValue = (context.scene.render_settings_prop.end - startingValue)/iterations
+        
+        # Create the text
+        bpy.ops.object.add(type="FONT")
+        currText = bpy.context.object
+        currText.parent = bpy.data.objects["Camera"]
+        currText.location = (-1.4,-0.696,-4.0)
         
         for index in range(0,iterations):
             renderSlots.active_index = index
@@ -43,6 +50,12 @@ class RenderSettingsOperator(bpy.types.Operator):
             exec(context.scene.render_settings_prop.target + "=" + str(startingValue + incrementalValue*index))
             
             bpy.ops.render.render()
+            
+        # Delete the text
+        bpy.ops.object.select_all(action="DESELECT")
+        currText.select_set(True)
+        bpy.context.view_layer.objects.active = currText
+        bpy.ops.object.delete()
         
         return {'FINISHED'}
      
