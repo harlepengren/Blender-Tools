@@ -17,6 +17,7 @@ import bpy
 # Property Group for the settings
 class RenderSettingsPropertyGroup(bpy.types.PropertyGroup):
     numRenders: bpy.props.IntProperty(name="numRenders",default=1)
+    targetName: bpy.props.StringProperty(name="targetName",description="Name of the setting that will change.")
     target: bpy.props.StringProperty(name="target", description="datapath of setting we want to change")
     start: bpy.props.FloatProperty(name="start", default=0.0, description="starting value")
     end: bpy.props.FloatProperty(name="end", default=1.0, description="ending value")
@@ -35,6 +36,12 @@ class RenderSettingsOperator(bpy.types.Operator):
             mat.use_nodes = True
             nodes = mat.node_tree.nodes
 
+        # Add emission
+        bsdf = mat.node_tree.nodes["Principled BSDF"]
+        bsdf.inputs['Emission'].default_value = (1.0,1.0,1.0,1.0)
+        bsdf.inputs['Emission Strength'].default_value = 0.3
+        
+        
         
         if text_object.data.materials:
             text_object.materials[0] = mat
@@ -57,22 +64,28 @@ class RenderSettingsOperator(bpy.types.Operator):
         currText = bpy.context.object
         currText.parent = bpy.data.objects["Camera"]
         currText.location = (-1.4,-0.696,-4.0)
+        currText.scale = (0.5,0.5,0.5)
         self.CreateMaterial(currText)
         
+        wm = bpy.context.window_manager
+        totalProgress = iterations
+        wm.progress_begin(0,totalProgress)
         for index in range(0,iterations):
             renderSlots.active_index = index
             
             # Change the setting - using exec is not super safe
             currentValue = startingValue + incrementalValue*index
             exec(context.scene.render_settings_prop.target + "=" + str(currentValue))
-            currText.data.body = str(currentValue)
+            currText.data.body = bpy.context.scene.render_settings_prop.targetName + ": " + str(currentValue)
             bpy.ops.render.render()
+            wm.progress_update(index)
             
         # Delete the text
         bpy.ops.object.select_all(action="DESELECT")
         currText.select_set(True)
         bpy.context.view_layer.objects.active = currText
         bpy.ops.object.delete()
+        wm.progress_end()
         
         return {'FINISHED'}
      
@@ -84,6 +97,7 @@ class RenderSettingsPanel(bpy.types.Panel):
     
     def draw(self, context):
         self.layout.prop(bpy.context.scene.render_settings_prop,"numRenders")
+        self.layout.prop(bpy.context.scene.render_settings_prop,"targetName")
         self.layout.prop(bpy.context.scene.render_settings_prop,"target")
         self.layout.prop(bpy.context.scene.render_settings_prop,"start")
         self.layout.prop(bpy.context.scene.render_settings_prop,"end")        
