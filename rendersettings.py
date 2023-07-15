@@ -54,10 +54,18 @@ class RenderSettingsOperator(bpy.types.Operator):
 
         renderSlots = bpy.data.images["Render Result"].render_slots
         
+        # Determine the type of the target
+        
+        isInt = eval('type(' + context.scene.render_settings_prop.target + ')== int')
+        
         # Set the render seetings
         startingValue = context.scene.render_settings_prop.start
-        iterations = min(context.scene.render_settings_prop.numRenders,len(renderSlots))
+        iterations = int(min(context.scene.render_settings_prop.numRenders,len(renderSlots)))
         incrementalValue = (context.scene.render_settings_prop.end - startingValue)/iterations
+        
+        if isInt:
+            startingValue = int(startingValue)
+            incrementalValue = int(incrementalValue)
         
         # Create the text
         bpy.ops.object.add(type="FONT")
@@ -73,8 +81,9 @@ class RenderSettingsOperator(bpy.types.Operator):
         for index in range(0,iterations):
             renderSlots.active_index = index
             
-            # Change the setting - using exec is not super safe
+            # Change the setting - using exec is not safe
             currentValue = startingValue + incrementalValue*index
+            
             exec(context.scene.render_settings_prop.target + "=" + str(currentValue))
             currText.data.body = bpy.context.scene.render_settings_prop.targetName + ": " + str(currentValue)
             bpy.ops.render.render()
