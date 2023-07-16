@@ -61,7 +61,7 @@ class RenderSettingsOperator(bpy.types.Operator):
         # Set the render seetings
         startingValue = context.scene.render_settings_prop.start
         iterations = int(min(context.scene.render_settings_prop.numRenders,len(renderSlots)))
-        incrementalValue = (context.scene.render_settings_prop.end - startingValue)/iterations
+        incrementalValue = (context.scene.render_settings_prop.end - startingValue)/max(1,iterations-1)
         
         if isInt:
             startingValue = int(startingValue)
@@ -72,7 +72,7 @@ class RenderSettingsOperator(bpy.types.Operator):
         currText = bpy.context.object
         currText.parent = bpy.data.objects["Camera"]
         currText.location = (-1.4,-0.696,-4.0)
-        currText.scale = (0.5,0.5,0.5)
+        currText.scale = (0.3,0.3,0.3)
         self.CreateMaterial(currText)
         
         wm = bpy.context.window_manager
@@ -84,8 +84,8 @@ class RenderSettingsOperator(bpy.types.Operator):
             # Change the setting - using exec is not safe
             currentValue = startingValue + incrementalValue*index
             
-            exec(context.scene.render_settings_prop.target + "=" + str(currentValue))
-            currText.data.body = bpy.context.scene.render_settings_prop.targetName + ": " + str(currentValue)
+            exec(context.scene.render_settings_prop.target + "= " + str(currentValue))
+            currText.data.body = bpy.context.scene.render_settings_prop.targetName + ": {:.2f}".format(currentValue)
             bpy.ops.render.render()
             wm.progress_update(index)
             
